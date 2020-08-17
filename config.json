@@ -1,0 +1,17 @@
+{
+    
+    "serverPort": 3305,
+    "serverURL": "pinus",
+    "secret": "root",
+    
+    "sqlConfig": {
+
+        "port": "3309",
+        "database": "chat",
+        "host": "localhost",
+        "user": "root",
+        "password": ""
+
+    }
+
+}
