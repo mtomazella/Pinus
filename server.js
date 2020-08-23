@@ -1,10 +1,9 @@
 const express   = require( 'express' );
 const app       = express( );
-const mysql     = require( 'mysql' );
+//const mysql     = require( 'mysql' );
 const config    = require( './config.json' );
 const bp        = require( 'body-parser' );
-const crypto    = require( 'crypto' );
-const { request, response } = require('express');
+const { GET, POST, PUT, DELETE } = require( './src/routes' );
 
 /* Start API */
 
@@ -95,7 +94,7 @@ app.use( bp.urlencoded( { extended: false } ) );
 
     // Routes
 
-    function GET( table, request, response ){
+    /*function GET( table, request, response ){
         if ( Object.keys( request.query ).length == 0 ) response.json( { error: { errorCode: 'NO_AUTH_INFO', error: { desc: 'No authentication information sent' } } } );
         //if ( request.query.mode == 'admin' )
         let query = ` SELECT * FROM ${table} `;
@@ -245,7 +244,7 @@ app.use( bp.urlencoded( { extended: false } ) );
         } )
     }
 
-    function authenticate( table, identifier, password ){
+    function authenticateCredentials( table, identifier, password ){
         return new Promise( ( resolve, reject ) => {
             if ( password == undefined ) reject( { errorCode: 'PASSWORD_UNDF', raw: { desc: 'Undefined password' } } );
             if ( identifier.email == undefined && identifier.id == undefined && identifier.displayName == undefined ) reject( { errorCode: 'NO_UNQ_IDENT', raw: { desc: 'No unique identifier' } } );
@@ -269,4 +268,4 @@ app.use( bp.urlencoded( { extended: false } ) );
 
     function encrypt( password ){
         return crypto.createHmac( 'sha256', config.secret ).update( password ).digest( 'hex' );
-    }
+    }*/

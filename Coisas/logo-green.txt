@@ -1,0 +1,1 @@
+RGBA verdeLogo ( 0, 223, 100, 60 );
