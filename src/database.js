@@ -1,50 +1,67 @@
 const mysql = require( 'mysql' );
 const config = require( './../config.json' );
-const { authenticateCredentials } = require( './authentication' )
+const { encrypt } = require( './authentication' )
+
+function fetchQuery( query, sendPassword ){
+    return new Promise( ( resolve, reject ) => {
+        const connection = mysql.createConnection( config.sqlConfig );
+        connection.connect( ( error ) => {
+            if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
+            connection.query( query, ( error, Qres ) => {
+                if ( error ) reject( { code: 'QUERY_ERROR', raw: error } );
+                const users = [ ];
+                for ( let i in Qres ){
+                    users.push( Qres[ i ] );
+                    if ( !sendPassword ) users[ users.length-1 ].password = undefined;
+                }
+                connection.end();
+                resolve( users );
+            } );
+        } )
+    } );
+}
+
+function authenticateCredentials( table, identifier, password ){
+    return new Promise( ( resolve, reject ) => {
+        if ( password == undefined ) reject( { errorCode: 'PASSWORD_UNDF', raw: { desc: 'Undefined password' } } );
+        if ( identifier.email == undefined && identifier.id == undefined && identifier.displayName == undefined ) reject( { errorCode: 'NO_UNQ_IDENT', raw: { desc: 'No unique identifier' } } );
+        let query = `SELECT id FROM ${table} WHERE password = "${encrypt(password)}"`
+        const keys = Object.keys( identifier );
+        const values = Object.values( identifier );
+        for ( let i in keys ){
+            query += ` AND ${keys[i]} = "${values[i]}"`;
+        }
+        fetchQuery( query, false )
+        .then( ( result ) => {
+            resolve( result );
+        } )
+        .catch( ( error ) => {
+            reject( error );
+        } );
+    } )
+}
 
 module.exports = {
-    queryUsers: ( query, sendPassword ) => {
-        return new Promise( ( resolve, reject ) => {
-            const connection = mysql.createConnection( config.sqlConfig );
-            connection.connect( ( error ) => {
-                if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
-                connection.query( query, ( error, Qres ) => {
-                    if ( error ) reject( { code: 'QUERY_ERROR', raw: error } );
-                    const users = [ ];
-                    for ( let i in Qres ){
-                        users.push( Qres[ i ] );
-                        if ( !sendPassword ) users[ users.length-1 ].password = undefined;
-                    }
-                    connection.end();
-                    resolve( users );
-                } );
-            } )
-        } );
-    },
-    insertQuery: ( table, values ) => {
+    fetchQuery,
+    insertQuery: ( table, values, fields ) => {
         return new Promise( ( resolve, reject ) => {
             const connection = mysql.createConnection( config.sqlConfig );
             connection.connect( ( error ) => {
                 if ( error ) reject( 'CONNECTION_ERROR', error );
-                let query = ' INSERT INTO ' + table + ' VALUES ( null, ?, ?, ?, ?';
-                let numVal = 3;
-                if ( table == 'admin' ){ 
-                    query += ', ?';
-                    numVal++;
-                }
-                query += ');'
+                let query = ` INSERT INTO ${table} VALUES ( ?`;
                 const valuesArray = [ ];
-                const fields = [ 'displayName', 'name', 'email', 'password', 'accessLevel' ]
-                for ( let i = 0; i <= numVal; i++ ){
+                for ( let i = 0; i <= fields.length-1; i++ ){
+                    if ( i != 0 ) query += ', ?';
                     let value = values[ fields[ i ] ];
                     if ( fields[ i ] == "password" ) value = encrypt( value );
                     valuesArray.push( value );
                 }
+                query += ');'
                 connection.query( query, valuesArray, ( error, Qres ) => {
                     if ( error || Qres == undefined ) reject( { code: 'QUERY_ERROR', raw: error } );
                     else{ 
                         connection.end();
-                        resolve( queryUsers( `SELECT * FROM ${table} WHERE id = ${Qres.insertId}`, false ) );
+                        resolve( fetchQuery( `SELECT * FROM ${table} WHERE id = ${Qres.insertId}`, false ) );
                     }
                 } );
             } )
@@ -71,7 +88,7 @@ module.exports = {
                         if ( error ) reject( { code: 'QUERY_ERROR', raw: error } );
                         else{
                             connection.end(); 
-                            resolve( queryUsers( `SELECT * FROM ${table} WHERE ${Object.keys(identifier)[0]} = "${Object.values(identifier)[0]}"`, false ) );
+                            resolve( fetchQuery( `SELECT * FROM ${table} WHERE ${Object.keys(identifier)[0]} = "${Object.values(identifier)[0]}"`, false ) );
                         }
                     } )
                 } )
@@ -104,5 +121,6 @@ module.exports = {
                 } );
             } )
         } )
-    }
+    },
+    authenticateCredentials
 }
