@@ -4,7 +4,7 @@ const bp        = require( 'body-parser' );
 const { GET, POST, PUT, DELETE } = require( './routes' );
 const { request, response } = require('express');
 
-/* Midwares */
+/* Middlewares */
 
 app.use( ( request, response, next ) => {
     request.header( 'Access-Control-Allow-Origin', '*' );
@@ -17,6 +17,7 @@ app.use( ( request, response, next ) => {
 } )
 app.use( bp.json() );
 app.use( bp.urlencoded( { extended: false } ) );
+app.use(  )
 
 /* REST Routes */
 
