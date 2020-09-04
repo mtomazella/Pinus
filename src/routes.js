@@ -1,4 +1,5 @@
-const { fetchQuery, insertQuery, deleteQuery, updateQuery } = require( './database' );
+const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact } = require( './database' );
+const { request, response } = require('express');
 
 module.exports = {  
     GET: ( table, request, response ) => {
@@ -38,5 +39,15 @@ module.exports = {
         .catch( ( error ) => {
             response.status(500).json( { errorCode: error.code, error: error.raw } );
         } );
+    },
+    DELETEcont: ( request, response ) => {
+        deleteContact( request )
+        .then( ( result ) => {
+            response.status(200).json( result );
+        } )
+        .catch( ( error ) => {
+            console.log(error)
+            response.status(500).json( { errorCode: error.code, error: error.raw } );
+        } )
     }
 }

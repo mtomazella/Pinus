@@ -1,8 +1,7 @@
 const express   = require( 'express' );
 const app       = express( );
 const bp        = require( 'body-parser' );
-const { GET, POST, PUT, DELETE } = require( './routes' );
-const { request, response } = require('express');
+const { GET, POST, PUT, DELETE, DELETEcont } = require( './routes' );
 
 /* Middlewares */
 
@@ -17,7 +16,6 @@ app.use( ( request, response, next ) => {
 } )
 app.use( bp.json() );
 app.use( bp.urlencoded( { extended: false } ) );
-app.use(  )
 
 /* REST Routes */
 
@@ -39,7 +37,7 @@ app.use(  )
 
         DELETE  user    - delete user               DONE
         DELETE  admin   - delete admin              DONE
-        DELETE  cont    - delete contact            autenticação não funciona com os contatos. Achar uma solução
+        DELETE  cont    - delete contact            DONE
     */
 
     /* GET */
@@ -136,7 +134,7 @@ app.use(  )
         /* Contact */
 
         app.delete( '/cont', ( request, response ) => {
-            DELETE( 'contact', request, response );
+            DELETEcont( request, response );
         } )
 
 /* ------------ */

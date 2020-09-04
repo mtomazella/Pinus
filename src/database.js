@@ -1,6 +1,7 @@
 const mysql = require( 'mysql' );
 const config = require( './../config.json' );
-const { encrypt } = require( './authentication' )
+const { encrypt } = require( './authentication' );
+const { request } = require('express');
 
 function fetchQuery( query, sendPassword ){
     return new Promise( ( resolve, reject ) => {
@@ -121,6 +122,39 @@ module.exports = {
                 } );
             } )
         } )
+    },
+    deleteContact: ( request ) => {
+        return new Promise( ( resolve, reject ) => {
+            const password = request.body.password;
+            const identifier = request.body.from;
+            let table = 'user';
+            if ( identifier.idAdmin || identifier.emailAdmin ) table = 'admin';
+            let collum;
+            if ( Object.keys(identifier)[0].search( 'id' ) != -1 ) collum = 'id'
+            else if ( Object.keys(identifier)[0].search( 'email' ) != -1 ) collum = 'email';
+            else reject( { code: 'NO_FROM_IDENT', raw: { desc: 'No identifier from host user received' } } );
+            const query = `SELECT id FROM ${table} WHERE password = "${encrypt(password)}" AND ${collum} = "${Object.values( identifier )[0]}"`;
+            fetchQuery( query, false )
+            .then( ( ) => {
+                const connection = mysql.createConnection( config.sqlConfig );
+                connection.connect( ( error ) => {
+                    if ( error ) reject( { code: { code: 'CONNECTION_ERROR', raw: error } } );
+                    connection.query( `DELETE FROM contact WHERE ${Object.keys(request.body.identifier)[0]} = ${Object.values(request.body.identifier)[0]}` );
+                    connection.end();
+                } );
+                fetchQuery( `SELECT * FROM contact WHERE ${Object.keys(identifier)[0]} = ${Object.values(identifier)[0]}`, false )
+                .then( ( result ) => {
+                        resolve( result );
+                    }
+                )
+                .catch( ( error ) => {
+                    reject( error );
+                } )
+            } )
+            .catch( ( error ) => {
+                reject( { code: 'AUTH_ERROR', raw: error } );
+            } );
+        } );
     },
     authenticateCredentials
 }
