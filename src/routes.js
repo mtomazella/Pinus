@@ -4,7 +4,16 @@ const { request, response } = require('express');
 module.exports = {  
     GET: ( table, request, response ) => {
         let query = ` SELECT * FROM ${table} `;
-        if ( Object.keys( request.query )[0] != undefined ) query += ( ` WHERE ${Object.keys(request.query)[0]} = "${Object.values( request.query )[0]}"` );
+        if ( Object.keys( request.query )[0] != undefined ){ 
+            const keys      = Object.keys(request.query);
+            const values    = Object.values( request.query );
+            query += ( ` WHERE ${keys[0]} = "${values[0]}"` );
+            keys.shift(); 
+            values.shift();
+            for ( let i in keys ) {
+                query += ` AND ${keys[i]} = "${values[i]}"`;
+            }
+        }
         fetchQuery( query, false )
         .then( ( users ) => {
             response.status(200).json( users );
