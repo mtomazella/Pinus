@@ -6,11 +6,11 @@
     
     "sqlConfig": {
 
-        "port": "3309",
-        "database": "chat",
-        "host": "localhost",
-        "user": "root",
-        "password": ""
+        "port": "3306",
+        "database": "cl19140",
+        "host": "143.106.241.3",
+        "user": "cl19140",
+        "password": "cl*25052004"
 
     }
 

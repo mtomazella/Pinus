@@ -1,0 +1,33 @@
+{
+  "name": "pinus-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start-dev": "nodemon server.js",
+    "open": "start 'http://pinus-api.com:3305'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheusTomazella/pinus.git"
+  },
+  "author": "Matheus Tomazella",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matheusTomazella/pinus/issues"
+  },
+  "homepage": "https://github.com/matheusTomazella/pinus#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "serve": "^11.3.2",
+    "socket.io": "^3.0.3"
+  }
+}

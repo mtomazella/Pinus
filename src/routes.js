@@ -1,4 +1,4 @@
-const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact } = require( './database' );
+const { fetchQuery, insertQuery, deleteQuery, updateQuery, updateNoPassword, deleteContact, deleteNoPassword } = require( './database' );
 const { request, response } = require('express');
 
 module.exports = {  
@@ -40,6 +40,15 @@ module.exports = {
             response.status(500).json( { error: { errorCode: error.code, error: error.raw } } );
         } )
     },
+    PUTnoPassword: ( table, request, response ) => {
+        updateNoPassword( table, request.body.update, request.body.identifier )
+        .then( ( result ) => {
+            response.status(200).json( result );
+        } )
+        .catch( ( error ) => {
+            response.status(500).json( { error: { errorCode: error.code, error: error.raw } } );
+        } )
+    },
     DELETE: ( table, request, response ) => {
         deleteQuery( table, request.body.identifier, request.body.password )
         .then( ( result ) => {
@@ -51,6 +60,16 @@ module.exports = {
     },
     DELETEcont: ( request, response ) => {
         deleteContact( request )
+        .then( ( result ) => {
+            response.status(200).json( result );
+        } )
+        .catch( ( error ) => {
+            console.log(error)
+            response.status(500).json( { errorCode: error.code, error: error.raw } );
+        } )
+    },
+    DELETEnoPassword: ( table, identifier, response ) => {
+        deleteNoPassword( table, identifier )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
