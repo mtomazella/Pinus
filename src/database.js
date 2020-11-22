@@ -1,10 +1,18 @@
 const mysql = require( 'mysql' );
-const config = require( './../config.json' );
+const process = require( 'process' )
+//const config = require( './../config.json' );
 const { encrypt } = require( './authentication' );
+const sqlConfig = {
+    port:       process.env.SQL_PORT,
+    database:   process.env.SQL_DB,
+    host:       process.env.SQL_HOST,
+    user:       process.env.SQL_USER,
+    password:   process.env.SQL_PASS
+}
 
 function fetchQuery( query, sendPassword ){
     return new Promise( ( resolve, reject ) => {
-        const connection = mysql.createConnection( config.sqlConfig );
+        const connection = mysql.createConnection( sqlConfig );
         connection.connect( ( error ) => {
             if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
             connection.query( query, ( error, Qres ) => {
@@ -43,7 +51,7 @@ module.exports = {
     fetchQuery,
     insertQuery: ( table, values, fields ) => {
         return new Promise( ( resolve, reject ) => {
-            const connection = mysql.createConnection( config.sqlConfig );
+            const connection = mysql.createConnection( sqlConfig );
             connection.connect( ( error ) => {
                 if ( error ) reject( 'CONNECTION_ERROR', error );
                 let query = ` INSERT INTO ${table} VALUES ( ?`;
@@ -67,7 +75,7 @@ module.exports = {
     },
     updateQuery: ( table, info, identifier, password ) => {
         return new Promise( ( resolve, reject ) => {
-            const connection = mysql.createConnection( config.sqlConfig );
+            const connection = mysql.createConnection( sqlConfig );
             connection.connect( ( error ) => {
                 if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
                 if ( info == undefined ) reject( { code: 'UPT_UNDF', raw: { desc: 'No content in information object' } } );
@@ -100,7 +108,7 @@ module.exports = {
     },
     updateNoPassword: ( table, info, identifier ) => {
         return new Promise( ( resolve, reject ) => {
-            const connection = mysql.createConnection( config.sqlConfig );
+            const connection = mysql.createConnection( sqlConfig );
             connection.connect( ( error ) => {
                 if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
                 if ( info == undefined ) reject( { code: 'UPT_UNDF', raw: { desc: 'No content in information object' } } );
@@ -125,7 +133,7 @@ module.exports = {
     },
     deleteQuery: ( table, identifier, password ) => {
         return new Promise( ( resolve, reject ) => {
-            const connection = mysql.createConnection( config.sqlConfig );
+            const connection = mysql.createConnection( sqlConfig );
             connection.connect( ( error ) => {
                 if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
                 authenticateCredentials( table, identifier, password )
@@ -159,7 +167,7 @@ module.exports = {
             const query = `SELECT id FROM ${table} WHERE password = "${encrypt(password)}" AND ${collum} = "${Object.values( identifier )[0]}"`;
             fetchQuery( query, false )
             .then( ( ) => {
-                const connection = mysql.createConnection( config.sqlConfig );
+                const connection = mysql.createConnection( sqlConfig );
                 connection.connect( ( error ) => {
                     if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
                     connection.query( `DELETE FROM contact WHERE ${Object.keys(request.body.identifier)[0]} = ${Object.values(request.body.identifier)[0]}` );
@@ -181,7 +189,7 @@ module.exports = {
     },
     deleteNoPassword: ( table, identifier ) => {
         return new Promise( ( resolve, reject ) => {
-            const connection = mysql.createConnection( config.sqlConfig );
+            const connection = mysql.createConnection( sqlConfig );
             connection.connect( ( error ) => {
                 if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } )
                 const keys   = Object.keys( identifier );
