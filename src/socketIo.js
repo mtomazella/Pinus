@@ -18,7 +18,9 @@ const databaseFields    = require( './databaseFields.json' );
         RECEIVE disconnect  - delete client socket          DONE    NOT_TESTED
     */
 
-    io.on( 'connection', ( socket ) => {
+    io.on( 'connect', ( socket ) => {
+
+        io.to(socket).emit( 'connect' );
 
         /* RECEIVE setSocket */
 
