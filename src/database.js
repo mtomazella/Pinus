@@ -1,8 +1,7 @@
-const mysql = require( 'mysql' );
-const process = require( 'process' )
-//const config = require( './../config.json' );
-const { encrypt } = require( './authentication' );
-const sqlConfig = {
+const mysql         = require( 'mysql' );
+const process       = require( 'process' )
+const { encrypt }   = require( './authentication' );
+const sqlConfig     = {
     port:       process.env.SQL_PORT,
     database:   process.env.SQL_DB,
     host:       process.env.SQL_HOST,

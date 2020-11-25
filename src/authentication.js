@@ -1,6 +1,5 @@
-const crypto = require( 'crypto' );
-const process = require( 'process' );
-//const config = require( './../config.json' );
+const crypto    = require( 'crypto' );
+const process   = require( 'process' );
 
 module.exports = {
     encrypt: ( password ) => {

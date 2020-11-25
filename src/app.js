@@ -1,8 +1,8 @@
-const express   = require( 'express' );
-const app       = express( );
-const bp        = require( 'body-parser' );
-const CORS      = require( 'cors' );
-const databaseFields = require( './databaseFields.json' );
+const express           = require( 'express' );
+const app               = express( );
+const bp                = require( 'body-parser' );
+const CORS              = require( 'cors' );
+const databaseFields    = require( './databaseFields.json' );
 const { GET, POST, PUT, DELETE, DELETEcont, PUTnoPassword, DELETEnoPassword } = require( './routes' );
 const { fetchQuery }                                                          = require( './database' );
 
