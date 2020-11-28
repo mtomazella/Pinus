@@ -107,13 +107,17 @@ app.use( bp.urlencoded( { extended: false } ) );
         /* Message */
 
         app.post( '/msg', async ( request, response ) => {
+            if ( !isValidMessage( request.body ) ) {
+                response.status(500).json( { error: { code: 'INVALID_MSG' } } );
+                return;
+            } 
             userAndAdminExist( request )
             .then( ( ) => {
                 request.body.datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
                 POST( 'chat', databaseFields.chat, request, response );
             } )
             .catch( ( ) => {
-                response.json( { code: 'ADM_USER_UNDF', raw: { desc: "No User/Admin found." } } );
+                response.status(500).json( { code: 'ADM_USER_UNDF', raw: { desc: "No User/Admin found." } } );
             } );
         } )
 
@@ -210,7 +214,7 @@ app.use( bp.urlencoded( { extended: false } ) );
 
 /* ------------ */
 
-module.exports = { app };
+module.exports = { app, isValidMessage };
 
 /* Created Functions */
 
@@ -248,4 +252,8 @@ function getComponentId ( request ) {
             reject( { code: error.errorCode, raw: error } );
         } )
     } )
+}
+
+function isValidMessage ( message ) {
+    return ( message.type == 'text' && message.text.trim() !== '' && message.text !== undefined );
 }

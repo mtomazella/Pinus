@@ -9,4 +9,4 @@ http.listen( process.env.PORT || 3305, ( error ) => {
     console.log( 'API Started' );
 } );
 
-new RealTimeHandler( http );
+const realTime = new RealTimeHandler( http );

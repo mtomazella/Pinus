@@ -1,5 +1,6 @@
-const { insertQuery }   = require( './database' );
-const databaseFields    = require( './databaseFields.json' );
+const { insertQuery }       = require( './database' );
+const databaseFields        = require( './databaseFields.json' );
+const { isValidMessage }    = require( './app' );
 
 class RealTimeHandler {
 
@@ -9,6 +10,8 @@ class RealTimeHandler {
         admin: { },
         user: { }
     }
+
+    io;
 
     constructor ( server ) {
 
@@ -21,47 +24,64 @@ class RealTimeHandler {
 
         /* List */
     /* 
-        RECEIVE supportRequest      - receives user support request DONE    NOT_TESTED
-        RECEIVE setSocket           - save client socket            DONE    NOT_TESTED
-        RECEIVE message             - receive message from socket   DONE    NOT_TESTED
-        RECEIVE disconnect          - delete client socket          DONE    NOT_TESTED
-        RECEIVE supportConnect      - connects a admin to a user    DONE    NOT_TESTED
-        RECEIVE supportDisconnect   - deisconnect a support room    DONE    NOT_TESTED
-        RECEIVE supportQueue        - returns the support queue     DONE    NOT_TESTED
+        BROADCAST   supportQueue        - broadcasts supportQueue       DONE    
+
+        SEND        supportQueue        - sends supportQueue admin      DONE   
+        SEND        reportError         - sends an error                DONE 
+
+        RECEIVE     supportRequest      - receives user support request DONE    
+        RECEIVE     setSocket           - save client socket            DONE    
+        RECEIVE     message             - receive message from socket   DONE    
+        RECEIVE     disconnect          - delete client socket          DONE    CANCELED
+        RECEIVE     supportConnect      - connects a admin to a user    DONE    
+        RECEIVE     supportDisconnect   - deisconnect a support room    DONE    
+        RECEIVE     supportQueue        - returns the support queue     DONE    
     */
 
     /* WebSocket Routes */
 
         io.on( 'connect', ( socket ) => {
 
-            console.log( 'User Connected' );
+            //console.log( 'User Connected' );
     
             /* RECEIVE setSocket */
     
             socket.on( 'setSocket', ( info ) => {
-                clientSockets[ info.type ][ info.id ] = socket;
-                socket.pinus.userType = info.type;
-                if ( info.type == 'admin' ) socket.join( 'support' )
-                else this.supportQueue.unshift( socket );
+                try {
+                    this.clientSockets[ info.type ][ info.id ] = socket;
+                    socket.user = { type: info.type, id: info.id };
+                    if ( info.type == 'admin' ) socket.join( 'support' )
+                } catch ( error ) {
+                    console.log( 'setSocket error', error )
+                }
             } );
     
             /* RECEIVE disconnect */
     
-            socket.on( 'disconnection', ( info ) => {
-                console.log('user disconnected')
-                if ( clientSockets[ info.type ][ info.id ] == socket ) delete clientSockets[ info.type ][ info.id ];
+            socket.on( 'disconnect', ( ) => {
+                //console.log('user disconnected - Apagar socket retirado')
+                //if ( this.clientSockets[ socket.pinus.userType ][ socket.pinus.userId ] == socket ) delete this.clientSockets[ socket.pinus.userType ][ socket.pinus.userId ];
             } );
     
             /* RECEIVE message */
     
-            socket.on( 'message', ( message ) => {
+            socket.on( 'message', ( info ) => {
+                if ( !isValidMessage( info.message ) ) {
+                    this.send_reportError( socket, { error: { code: 'INVALID_MSG' } } );
+                    return;
+                } 
+                info.message.datetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
                 // Sending Message
-                const destinationType   = ( message.sender == 'user' ) ? 'admin' : 'user';
-                const destinationId     = message[ `id${destinationType.capitalizeFirstChar()}` ];
-                const destinationSocket = clientSockets[ destinationType ][ destinationId ];
-                if ( destinationSocket ) io.to(destinationSocket).emit( 'message', message ); 
+                try {
+                    const destinationType   = ( info.message.sender == 'user' ) ? 'admin' : 'user';
+                    const destinationId     = info.message[ `id${capitalizeFirstChar(destinationType)}` ];
+                    const destinationSocket = this.clientSockets[ destinationType ][ destinationId ];
+                    if ( destinationSocket.id == info.otherSocketId ) io.to(destinationSocket.id).emit( 'message', info.message ); 
+                } catch ( error ) {
+                    console.log( error );
+                }
                 // Inserting into database
-                insertQuery( 'chat', message, databaseFields.chat )
+                insertQuery( 'chat', info.message, databaseFields.chat )
                 .catch( ( error ) => {
                     console.log( `Amigo, mil desculpas, mas a mensagem não foi gravada e a gente não vai tentar de novo: 
                     ${error}` );
@@ -71,33 +91,52 @@ class RealTimeHandler {
             /* RECEIVE supportRequest */
 
             socket.on( 'supportRequest', ( ) => {
-                io.to( 'support' ).emit( 'supportRequest', { socket: socket } );
+                if ( !socket.user.type == 'user' || this.supportQueue.indexOf( socket.id ) !== -1 ) return;
+                for ( let i = this.supportQueue.length-1; i >= 0; i-- ) if ( this.supportQueue[i].userId == socket.user.id ) this.supportQueue.splice( i, 1 )
+                this.supportQueue.push( { socketId: socket.id, userId: socket.user.id } );
+                this.broadcast_supportQueue();
             } )
 
             /* RECEIVE supportQueue */
 
             socket.on( 'supportQueue', ( ) => {
-                if ( socket.pinus.userType == 'admin' ) io.to( socket ).emit( 'supportQueue', this.supportQueue );
+                this.send_supportQueue( socket );
             } )
 
             /* RECEIVE supportConnect */
 
             socket.on( 'supportConnect', ( info ) => {
-                for ( let i in this.supportQueue ) {
-                    if ( this.supportQueue[i].id == info.userSocket.id ) this.supportQueue.splice( i, 1 );
+                for ( let i = this.supportQueue.length-1; i >= 0; i-- ) {
+                    if ( this.supportQueue[i] == info.socketId ) this.supportQueue.splice( i, 1 );
                 }
-                io.to( info.userSocket.id ).emit( { supportSocket: socket } );
+                io.to( info.socketId ).emit( 'supportConnect', { support: { socketId: socket.id, supportId: socket.user.id }, user: { socketId: info.socketId, userId: info.userId } } );
             } )
 
             /* RECEIVE supportDisconnect */
 
             socket.on( 'supportDisconnect', ( info ) => {
-                io.to( info.otherSocket.id ).emit( 'supportDisconnect', info );
+                io.to( info.otherUserInfo.socketId ).emit( 'supportDisconnect', { otherUserInfo: info.userInfo, userInfo: info.otherUserInfo } );
+                console.log( { otherUserInfo: info.userInfo, userInfo: info.otherUserInfo } )
             } )
-    
         } )
 
+        this.io = io;
         return io;
+    }
+
+    /* SEND supportQueue */
+    send_supportQueue ( socket ) {
+        if ( !socket.user || socket.user.type == 'admin' ) this.io.to( socket.id ).emit( 'supportQueue', this.supportQueue );
+    }
+
+    /* SEND reportError */
+    send_reportError ( socket, error ) { 
+        this.io.to( socket.id ).emit( error );
+    }
+
+    /* BROADCAST supportQueue */
+    broadcast_supportQueue ( ) { 
+        this.io.to( 'support' ).emit( 'supportQueue', this.supportQueue );
     }
 }
 
@@ -105,6 +144,6 @@ module.exports = { RealTimeHandler }
     
 /* Functions */
 
-String.prototype.capitalizeFirstChar = ( ) => {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+function capitalizeFirstChar ( string ) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
