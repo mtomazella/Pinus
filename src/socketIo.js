@@ -1,6 +1,6 @@
-const { insertQuery }       = require( './database' );
-const databaseFields        = require( './databaseFields.json' );
-const { isValidMessage }    = require( './app' );
+const { insertQuery, fetchQuery }       = require( './database' );
+const databaseFields                    = require( './databaseFields.json' );
+const { isValidMessage }                = require( './app' );
 
 class RealTimeHandler {
 
@@ -29,9 +29,12 @@ class RealTimeHandler {
         SEND        supportQueue        - sends supportQueue admin      DONE   
         SEND        reportError         - sends an error                DONE 
 
+        CHAT        messageLoad         - send old messages to chat     DONE
+
         RECEIVE     supportRequest      - receives user support request DONE    
         RECEIVE     setSocket           - save client socket            DONE    
         RECEIVE     message             - receive message from socket   DONE    
+        RECEIVE     messageLoad         - request for messageLoad       DONE   
         RECEIVE     disconnect          - delete client socket          DONE    CANCELED
         RECEIVE     supportConnect      - connects a admin to a user    DONE    
         RECEIVE     supportDisconnect   - deisconnect a support room    DONE    
@@ -88,6 +91,11 @@ class RealTimeHandler {
                 } )
             } )
 
+            /* RECEIVE messageLoad */
+            socket.on( 'messageLoad', ( chat ) => {
+                this.chat_messageLoad( chat.user, chat.support );
+            } )
+
             /* RECEIVE supportRequest */
 
             socket.on( 'supportRequest', ( ) => {
@@ -109,7 +117,9 @@ class RealTimeHandler {
                 for ( let i = this.supportQueue.length-1; i >= 0; i-- ) {
                     if ( this.supportQueue[i] == info.socketId ) this.supportQueue.splice( i, 1 );
                 }
-                io.to( info.socketId ).emit( 'supportConnect', { support: { socketId: socket.id, supportId: socket.user.id }, user: { socketId: info.socketId, userId: info.userId } } );
+                const chatInfo = { support: { socketId: socket.id, supportId: socket.user.id }, user: { socketId: info.socketId, userId: info.userId } };
+                io.to( info.socketId ).emit( 'supportConnect', chatInfo );
+                this.chat_messageLoad( chatInfo.user, chatInfo.support );
             } )
 
             /* RECEIVE supportDisconnect */
@@ -132,6 +142,18 @@ class RealTimeHandler {
     /* SEND reportError */
     send_reportError ( socket, error ) { 
         this.io.to( socket.id ).emit( error );
+    }
+    
+    /* CHAT messageLoad */
+    chat_messageLoad ( user, support ) {
+        fetchQuery( `SELECT * FROM chat WHERE idUser = ${user.userId} AND idAdmin = ${support.supportId}`, false )
+        .then( ( messages ) => {
+            this.io.to( user.socketId    ).emit( 'messageLoad', messages );
+            this.io.to( support.socketId ).emit( 'messageLoad', messages );
+        } )
+        .catch( ( error ) => {
+            console.log( error );
+        } )
     }
 
     /* BROADCAST supportQueue */
