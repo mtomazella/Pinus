@@ -1,5 +1,6 @@
 const { fetchQuery, insertQuery, deleteQuery, updateQuery, updateNoPassword, deleteContact, deleteNoPassword } = require( './database' );
 const { request, response } = require('express');
+const { encrypt } = require( './authentication' );
 
 module.exports = {  
     GET: ( table, request, response ) => {
@@ -11,6 +12,7 @@ module.exports = {
             keys.shift(); 
             values.shift();
             for ( let i in keys ) {
+                if ( keys[i] == 'password' ) values[i] = encrypt( values[i] );
                 query += ` AND ${keys[i]} = "${values[i]}"`;
             }
         }
