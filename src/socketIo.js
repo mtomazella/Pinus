@@ -1,6 +1,6 @@
-const { insertQuery, fetchQuery }       = require( './database' );
-const databaseFields                    = require( './databaseFields.json' );
-const { isValidMessage }                = require( './app' );
+const { database }       = require( './database' );
+const databaseFields     = require( './databaseFields.json' );
+const { isValidMessage } = require( './app' );
 
 class RealTimeHandler {
 
@@ -146,7 +146,7 @@ class RealTimeHandler {
     
     /* CHAT messageLoad */
     chat_messageLoad ( user, support ) {
-        fetchQuery( `SELECT * FROM chat WHERE idUser = ${user.userId} AND idAdmin = ${support.supportId}`, false )
+        database.fetch( `SELECT * FROM chat WHERE idUser = ${user.userId} AND idAdmin = ${support.supportId}`, false )
         .then( ( messages ) => {
             this.io.to( user.socketId    ).emit( 'messageLoad', messages );
             this.io.to( support.socketId ).emit( 'messageLoad', messages );

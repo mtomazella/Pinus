@@ -3,8 +3,8 @@ const app               = express( );
 const bp                = require( 'body-parser' );
 const CORS              = require( 'cors' );
 const databaseFields    = require( './databaseFields.json' );
+const { database }      = require( './database' );
 const { GET, POST, PUT, DELETE, DELETEcont, PUTnoPassword, DELETEnoPassword } = require( './routes' );
-const { fetchQuery }                                                          = require( './database' );
 
 /* Middlewares */
 
@@ -220,12 +220,12 @@ module.exports = { app, isValidMessage };
 
 function userAndAdminExist ( request ) {
     return new Promise ( async ( resolve, reject ) => {
-        const userExists = await fetchQuery( `SELECT * FROM user WHERE id = "${request.body.idUser}"`, false )
+        const userExists = await database.fetch( `SELECT * FROM user WHERE id = "${request.body.idUser}"`, false )
         .then( ( user ) => {
             return user[0] != undefined;
         } )
         .catch( (err) => console.log(err));
-        const adminExists = await fetchQuery( `SELECT * FROM admin WHERE id = "${request.body.idAdmin}"`, false )
+        const adminExists = await database.fetch( `SELECT * FROM admin WHERE id = "${request.body.idAdmin}"`, false )
             .then( ( admin ) => {
                 return admin[0] != undefined;
             } )
@@ -243,7 +243,7 @@ function getComponentId ( request ) {
             if( !request.nameComp ) 
                 reject( { code: "NO_COMP_IDENT", raw: { desc: "No component identifier (name / id)" } } );
             else identifier = 'name';
-        fetchQuery( `SELECT id FROM component WHERE ${identifier} = "${identifier == 'id' ? request.idComp : request.nameComp}"` )
+        database.fetch( `SELECT id FROM component WHERE ${identifier} = "${identifier == 'id' ? request.idComp : request.nameComp}"` )
         .then( ( id ) => {
             if ( !id[0] ) reject( { code: "COMP_UNDF", raw: { desc: "Component undefined" } } );
             else resolve( id[0].id );

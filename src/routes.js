@@ -1,4 +1,4 @@
-const { fetchQuery, insertQuery, deleteQuery, updateQuery, updateNoPassword, deleteContact, deleteNoPassword } = require( './database' );
+const { database }          = require( './database' );
 const { request, response } = require('express');
 
 module.exports = {  
@@ -14,7 +14,7 @@ module.exports = {
                 query += ` AND ${keys[i]} = "${values[i]}"`;
             }
         }
-        fetchQuery( query, false )
+        database.fetch( query, false )
         .then( ( users ) => {
             response.status(200).json( users );
         } )
@@ -23,7 +23,7 @@ module.exports = {
         } )
     },
     POST: ( table, fields, request, response ) => {
-        insertQuery( table, request.body, fields )
+        database.insert( table, request.body, fields )
         .then( user => {
             response.status(200).json( user );
         } )
@@ -32,7 +32,7 @@ module.exports = {
         } )
     },
     PUT: ( table, request, response ) => {
-        updateQuery( table, request.body.update, request.body.identifier, request.body.password )
+        database.update( table, request.body.update, request.body.identifier, request.body.password )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
@@ -41,7 +41,7 @@ module.exports = {
         } )
     },
     PUTnoPassword: ( table, request, response ) => {
-        updateNoPassword( table, request.body.update, request.body.identifier )
+        database.updateNoPassword( table, request.body.update, request.body.identifier )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
@@ -50,7 +50,7 @@ module.exports = {
         } )
     },
     DELETE: ( table, request, response ) => {
-        deleteQuery( table, request.body.identifier, request.body.password )
+        database.delete( table, request.body.identifier, request.body.password )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
@@ -59,7 +59,7 @@ module.exports = {
         } );
     },
     DELETEcont: ( request, response ) => {
-        deleteContact( request )
+        database.deleteContact( request )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
@@ -69,7 +69,7 @@ module.exports = {
         } )
     },
     DELETEnoPassword: ( table, identifier, response ) => {
-        deleteNoPassword( table, identifier )
+        database.deleteNoPassword( table, identifier )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
