@@ -6,13 +6,13 @@ module.exports = {
     GET: ( table, request, response ) => {
         let query = ` SELECT * FROM ${table} `;
         if ( Object.keys( request.query )[0] != undefined ){ 
+            if ( request.query.password ) request.query.password = encrypt( request.query.password );
             const keys      = Object.keys(request.query);
             const values    = Object.values( request.query );
             query += ( ` WHERE ${keys[0]} = "${values[0]}"` );
             keys.shift(); 
             values.shift();
             for ( let i in keys ) {
-                if ( keys[i] == 'password' ) values[i] = encrypt( values[i] );
                 query += ` AND ${keys[i]} = "${values[i]}"`;
             }
         }
