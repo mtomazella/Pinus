@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "set NODE_ENV=test && jest",
     "start": "node server.js",
     "start-dev": "nodemon server.js",
     "open": "start 'http://pinus-api.com:3305'"
@@ -31,5 +31,11 @@
     "process": "^0.11.10",
     "serve": "^11.3.2",
     "socket.io": "^3.0.3"
+  },
+  "devDependencies": {
+    "factory-girl": "^5.0.4",
+    "faker": "^5.1.0",
+    "jest": "^26.6.3",
+    "supertest": "^6.0.1"
   }
 }

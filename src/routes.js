@@ -1,8 +1,33 @@
 const { fetchQuery, insertQuery, deleteQuery, updateQuery, updateNoPassword, deleteContact, deleteNoPassword } = require( './database' );
-const { request, response } = require('express');
-const { encrypt } = require( './authentication' );
+const { encrypt, generateToken } = require( './authentication' );
 
 module.exports = {  
+    LOGIN: ( request, response ) => {
+        if ( !request.body.email ) { 
+            response.status(500).json( { 'error': { errorCode: 'AUTH_ERR', error: 'Email required' } } );
+            return;
+        }
+        if ( !request.body.password ) { 
+            response.status(500).json( { 'error': { errorCode: 'AUTH_ERR', error: 'Password required' } } );
+            return;
+        }
+        request.body.password = encrypt( request.body.password );
+        fetchQuery( `SELECT * FROM ${request.body.type} WHERE email = '${request.body.email}' AND password = '${request.body.password}'`, false )
+        .then( ( user ) => {
+            if ( user[0] === undefined ) { 
+                response.status(500).json( { 'error': { errorCode: 'AUTH_ERR', error: 'User not found / Wrong password' } } );
+                return;
+            }
+            user = user[0];
+            user.type = request.body.type;
+            const token = generateToken( user.id, user.type );
+            response.status(200).json( { user, token } );
+        } )
+        .catch( error => {
+            response.status(500).json( { 'error': { errorCode: error.code, error: error } } );
+            return;
+        } )
+    },
     GET: ( table, request, response ) => {
         let query = ` SELECT * FROM ${table} `;
         if ( Object.keys( request.query )[0] != undefined ){ 

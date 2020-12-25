@@ -1,45 +1,51 @@
+require('dotenv').config({
+    path: ( process.env.NODE_ENV === 'test' ) ? '.env.test' : '.env'
+});
 const express           = require( 'express' );
 const app               = express( );
 const bp                = require( 'body-parser' );
 const CORS              = require( 'cors' );
 const databaseFields    = require( './databaseFields.json' );
-const { GET, POST, PUT, DELETE, DELETEcont, PUTnoPassword, DELETEnoPassword } = require( './routes' );
+const { LOGIN, GET, POST, PUT, DELETE, DELETEcont, PUTnoPassword, DELETEnoPassword } = require( './routes' );
 const { fetchQuery }                                                          = require( './database' );
+const authMid = require( './authenticationMiddleware' );
 
 /* Middlewares */
 
 app.use( CORS( ) );
 app.use( bp.json() );
 app.use( bp.urlencoded( { extended: false } ) );
+app.use( authMid );
 
 /* REST Routes */
 
         /* List */
     /*
-        GET     ping        - Test connection           DONE
-        GET     user        - return users              DONE
-        GET     admin       - return admins             DONE
-        GET     msg         - return messages           DONE
-        GET     cont        - return contacts           DONE
-        GET     comp        - return component          DONE
+        GET     ping        - Test connection                   DONE
+        GET     user        - returns users                     DONE
+        GET     admin       - returns admins                    DONE
+        GET     msg         - returns messages                  DONE
+        GET     cont        - returns contacts                  DONE
+        GET     comp        - returns component                 DONE
         
-        POST    admin       - add new admin             DONE
-        POST    user        - add new user              DONE
-        POST    msg         - add new message           DONE
-        POST    cont        - add new contact           DONE
-        POST    comp        - add component             DONE
-        POST    comp/prov   - add provider to comp      DONE
+        POST    login       - returns token after validation    TODO
+        POST    admin       - add new admin                     DONE
+        POST    user        - add new user                      DONE
+        POST    msg         - add new message                   DONE
+        POST    cont        - add new contact                   DONE
+        POST    comp        - add component                     DONE
+        POST    comp/prov   - add provider to comp              DONE
         
-        PUT     user        - change info about user    DONE
-        PUT     admin       - change info about admin   DONE
-        PUT     comp        - change info about comp    DONE
-        PUT     comp/prov   - change info about prov    DONE
+        PUT     user        - change info about user            DONE
+        PUT     admin       - change info about admin           DONE
+        PUT     comp        - change info about comp            DONE
+        PUT     comp/prov   - change info about prov            DONE
 
-        DELETE  user        - delete user               DONE
-        DELETE  admin       - delete admin              DONE
-        DELETE  cont        - delete contact            DONE
-        DELETE  comp        - delete component          DONE
-        DELETE  comp/prov   - delete component prov     DONE
+        DELETE  user        - delete user                       DONE
+        DELETE  admin       - delete admin                      DONE
+        DELETE  cont        - delete contact                    DONE
+        DELETE  comp        - delete component                  DONE
+        DELETE  comp/prov   - delete component prov             DONE
     */
 
     /* GET */
@@ -91,6 +97,11 @@ app.use( bp.urlencoded( { extended: false } ) );
             } )
 
     /* POST */
+
+        /* Login */
+        app.post( '/login', async ( request, response ) => {
+            LOGIN( request, response );
+        } )
 
         /* User */
         
