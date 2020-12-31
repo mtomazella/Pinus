@@ -35,7 +35,7 @@ class RealTimeHandler {
         RECEIVE     setSocket           - save client socket            DONE    
         RECEIVE     message             - receive message from socket   DONE    
         RECEIVE     messageLoad         - request for messageLoad       DONE   
-        RECEIVE     disconnect          - delete client socket          DONE    CANCELED
+        RECEIVE     disconnect          - delete client socket          TODO    CANCELED
         RECEIVE     supportConnect      - connects a admin to a user    DONE    
         RECEIVE     supportDisconnect   - deisconnect a support room    DONE    
         RECEIVE     supportQueue        - returns the support queue     DONE    
@@ -52,7 +52,7 @@ class RealTimeHandler {
             socket.on( 'setSocket', ( info ) => {
                 try {
                     this.clientSockets[ info.type ][ info.id ] = socket;
-                    socket.user = { type: info.type, id: info.id };
+                    socket.user = { type: info.type, id: info.id, name: info.name };
                     if ( info.type == 'admin' ) socket.join( 'support' )
                 } catch ( error ) {
                     console.log( 'setSocket error', error )
@@ -101,7 +101,7 @@ class RealTimeHandler {
             socket.on( 'supportRequest', ( ) => {
                 if ( !socket.user.type == 'user' || this.supportQueue.indexOf( socket.id ) !== -1 ) return;
                 for ( let i = this.supportQueue.length-1; i >= 0; i-- ) if ( this.supportQueue[i].userId == socket.user.id ) this.supportQueue.splice( i, 1 )
-                this.supportQueue.push( { socketId: socket.id, userId: socket.user.id } );
+                this.supportQueue.push( { socketId: socket.id, userId: socket.user.id, name: socket.user.name } );
                 this.broadcast_supportQueue();
             } )
 
@@ -117,7 +117,7 @@ class RealTimeHandler {
                 for ( let i = this.supportQueue.length-1; i >= 0; i-- ) {
                     if ( this.supportQueue[i] == info.socketId ) this.supportQueue.splice( i, 1 );
                 }
-                const chatInfo = { support: { socketId: socket.id, supportId: socket.user.id }, user: { socketId: info.socketId, userId: info.userId } };
+                const chatInfo = { support: { socketId: socket.id, supportId: socket.user.id, name: socket.user.name }, user: { socketId: info.socketId, userId: info.userId } };
                 io.to( info.socketId ).emit( 'supportConnect', chatInfo );
                 this.chat_messageLoad( chatInfo.user, chatInfo.support );
             } )
