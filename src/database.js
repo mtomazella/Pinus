@@ -1,6 +1,6 @@
-const mysql         = require( 'mysql' );
-const process       = require( 'process' )
-const { encrypt }   = require( './authentication' );
+const mysql                 = require( 'mysql' );
+const process               = require( 'process' )
+const { encrypt, decrypt }  = require( './authentication' );
 const sqlConfig     = {
     port:       process.env.SQL_PORT,
     database:   process.env.SQL_DB,
@@ -19,6 +19,10 @@ function fetchQuery( query, sendPassword ){
                 if ( !sendPassword && Qres != undefined ) Qres.forEach( user => {
                     user.password = undefined;
                 });
+                if ( Qres )
+                    Qres.forEach( user => {
+                        user.password = undefined;
+                    });
                 connection.end();
                 resolve( Qres );
             } );

@@ -30,17 +30,18 @@ module.exports = {
     },
     GET: ( table, request, response ) => {
         let query = ` SELECT * FROM ${table} `;
-        if ( Object.keys( request.query )[0] != undefined ){ 
+        let orderBy;
+        if ( request.query && request.query.order ) { orderBy = request.query.order; delete request.query.order; };
+        if ( Object.keys( request.query )[0] ) {
             if ( request.query.password ) request.query.password = encrypt( request.query.password );
-            const keys      = Object.keys(request.query);
-            const values    = Object.values( request.query );
+            const keys = Object.keys( request.query );
             query += ( ` WHERE ${keys[0]} = "${values[0]}"` );
-            keys.shift(); 
-            values.shift();
-            for ( let i in keys ) {
-                query += ` AND ${keys[i]} = "${values[i]}"`;
-            }
+            keys.shift( );
+            keys.forEach( key => {
+                query += ` AND ${key} = "${request.query[key]}"`;
+            } )
         }
+        if ( orderBy ) query += `ORDER BY ${orderBy};`;
         fetchQuery( query, false )
         .then( ( users ) => {
             response.status(200).json( users );
