@@ -35,7 +35,7 @@ module.exports = {
         if ( Object.keys( request.query )[0] ) {
             if ( request.query.password ) request.query.password = encrypt( request.query.password );
             const keys = Object.keys( request.query );
-            query += ( ` WHERE ${keys[0]} = "${values[0]}"` );
+            query += ( ` WHERE ${keys[0]} = "${request.query[keys[0]]}"` );
             keys.shift( );
             keys.forEach( key => {
                 query += ` AND ${key} = "${request.query[key]}"`;
