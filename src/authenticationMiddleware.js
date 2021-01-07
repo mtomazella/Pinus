@@ -43,7 +43,7 @@ module.exports = ( request, response, next ) => {
             }
             else fetchQuery( `SELECT * FROM admin WHERE id = ${decoded.id}` )
             .then( ( admin ) => {
-                if ( admin[0] ) next()
+                if ( admin[0] ) next( );
             } )
             .catch( ( error ) => {
                 console.log( error );

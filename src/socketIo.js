@@ -62,8 +62,9 @@ class RealTimeHandler {
             /* RECEIVE disconnect */
     
             socket.on( 'disconnect', ( ) => {
-                //console.log('user disconnected - Apagar socket retirado')
-                //if ( this.clientSockets[ socket.pinus.userType ][ socket.pinus.userId ] == socket ) delete this.clientSockets[ socket.pinus.userType ][ socket.pinus.userId ];
+                if ( this.clientSockets[ socket.user.type ][ socket.user.id ] == socket ) delete this.clientSockets[ socket.user.type ][ socket.user.id ];
+                for ( let i = this.supportQueue.length-1; i >= 0; i-- ) if ( this.supportQueue[i].userId == socket.user.id ) this.supportQueue.splice( i, 1 )
+                this.broadcast_supportQueue( );
             } );
     
             /* RECEIVE message */

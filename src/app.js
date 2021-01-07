@@ -6,8 +6,8 @@ const app               = express( );
 const bp                = require( 'body-parser' );
 const CORS              = require( 'cors' );
 const databaseFields    = require( './databaseFields.json' );
-const { LOGIN, GET, POST, PUT, DELETE, DELETEcont, PUTnoPassword, DELETEnoPassword } = require( './routes' );
-const { fetchQuery }                                                          = require( './database' );
+const { LOGIN, GET, POST, PUT, DELETE, DELETEcont } = require( './routes' );
+const { fetchQuery }                                = require( './database' );
 const authMid = require( './authenticationMiddleware' );
 
 /* Middlewares */
@@ -178,7 +178,7 @@ app.use( authMid );
                 response.status(500).json( { error: { code: "COMP_ID_UNDF", raw: { desc: "The identifier to a component must be an id" } } } );
                 return;
             }
-            PUTnoPassword( 'component', request, response );
+            PUT( 'component', request, response );
         } );
 
             /* Provider */
@@ -188,7 +188,7 @@ app.use( authMid );
                     request.body.identifier.idComp = await getComponentId( request.body.identifier ).catch( error => response.status(500).json( error ) );
                     delete request.body.identifier.nameComp;
                 }
-                PUTnoPassword( 'provider', request, response );
+                PUT( 'provider', request, response );
             } )
 
     /* DELETE */
@@ -214,13 +214,13 @@ app.use( authMid );
         /* Component */
 
         app.delete( '/comp', ( request, response ) => {
-            DELETEnoPassword( 'component', request.body, response );
+            DELETE( 'component', request, response );
         } );
 
             /* Provider */ 
 
             app.delete( '/comp/prov', ( request, response ) => {
-                DELETEnoPassword( 'provider', request.body, response );
+                DELETE( 'provider', request, response );
             } )
 
 /* ------------ */

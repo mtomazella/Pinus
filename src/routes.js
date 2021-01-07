@@ -1,4 +1,4 @@
-const { fetchQuery, insertQuery, deleteQuery, updateQuery, updateNoPassword, deleteContact, deleteNoPassword } = require( './database' );
+const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact } = require( './database' );
 const { encrypt, generateToken } = require( './authentication' );
 
 module.exports = {  
@@ -60,16 +60,7 @@ module.exports = {
         } )
     },
     PUT: ( table, request, response ) => {
-        updateQuery( table, request.body.update, request.body.identifier, request.body.password )
-        .then( ( result ) => {
-            response.status(200).json( result );
-        } )
-        .catch( ( error ) => {
-            response.status(500).json( { error: { errorCode: error.code, error: error.raw } } );
-        } )
-    },
-    PUTnoPassword: ( table, request, response ) => {
-        updateNoPassword( table, request.body.update, request.body.identifier )
+        updateQuery( table, request.body.update, request.body.identifier )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
@@ -78,7 +69,7 @@ module.exports = {
         } )
     },
     DELETE: ( table, request, response ) => {
-        deleteQuery( table, request.body.identifier, request.body.password )
+        deleteQuery( table, request.body.identifier )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
@@ -88,16 +79,6 @@ module.exports = {
     },
     DELETEcont: ( request, response ) => {
         deleteContact( request )
-        .then( ( result ) => {
-            response.status(200).json( result );
-        } )
-        .catch( ( error ) => {
-            console.log(error)
-            response.status(500).json( { errorCode: error.code, error: error.raw } );
-        } )
-    },
-    DELETEnoPassword: ( table, identifier, response ) => {
-        deleteNoPassword( table, identifier )
         .then( ( result ) => {
             response.status(200).json( result );
         } )
