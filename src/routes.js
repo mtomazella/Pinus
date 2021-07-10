@@ -1,4 +1,4 @@
-const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact } = require( './database' );
+const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact, insertVolunteer } = require( './database' );
 const { encrypt, generateToken } = require( './authentication' );
 
 module.exports = {  
@@ -52,6 +52,15 @@ module.exports = {
     },
     POST: ( table, fields, request, response ) => {
         insertQuery( table, request.body, fields )
+        .then( user => {
+            response.status(200).json( user );
+        } )
+        .catch( ( error ) => {
+            response.status(500).json( { error: { errorCode: error.code, error: error.raw } } );
+        } )
+    },
+    POSTvolunteer: ( table, fields, request, response ) => {
+        insertVolunteer( table, request.body, fields )
         .then( user => {
             response.status(200).json( user );
         } )

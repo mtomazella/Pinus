@@ -4,5 +4,6 @@
     "chat": [ "id", "idAdmin", "idUser", "datetime", "sender", "type", "text", "image" ],
     "contact": [ "id", "idAdmin", "idUser" ],
     "component": [ "id", "name", "descr" ],
-    "provider": [ "id", "idComp", "name", "link", "cost" ]
+    "provider": [ "id", "idComp", "name", "link", "cost" ],
+    "volunteer": [ "id", "nameVisibility", "isInstitution", "contactEmail", "whatsapp", "country", "state", "city", "description" ]
 }

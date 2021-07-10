@@ -96,6 +96,30 @@ module.exports = {
             } )
         } )
     },
+    insertVolunteer: ( table, values, fields ) => {
+        return new Promise( ( resolve, reject ) => {
+            const connection = mysql.createConnection( sqlConfig );
+            connection.connect( ( error ) => {
+                if ( error ) reject( 'CONNECTION_ERROR', error );
+                let query = ` INSERT INTO ${table} VALUES ( ?`;
+                const valuesArray = [ ];
+                for ( let i = 0; i <= fields.length-1; i++ ){
+                    if ( i != 0 ) query += ', ?';
+                    let value = values[ fields[ i ] ];
+                    if ( fields[ i ] == "password" ) value = encrypt( value );
+                    valuesArray.push( value );
+                }
+                query += ');'
+                connection.query( query, valuesArray, ( error, Qres ) => {
+                    if ( error || Qres == undefined ) reject( { code: 'QUERY_ERROR', raw: error } );
+                    else{ 
+                        connection.end();
+                        resolve( fetchQuery( `SELECT * FROM ${table} WHERE id = ${values.id}`, false ) );
+                    }
+                } );
+            } )
+        } )
+    },
     updateQuery: ( table, info, identifier, password ) => {
         return new Promise( ( resolve, reject ) => {
             const connection = mysql.createConnection( sqlConfig );

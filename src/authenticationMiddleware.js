@@ -11,6 +11,10 @@ module.exports = ( request, response, next ) => {
             next();
             return;
         }
+        if ( request.method === 'GET' && [ '/comp', 'comp/prov', '/volunt' ].includes(request.path) ) {
+            next();
+            return;
+        }
         if ( !request.body.token && !request.query.token ) {
             response.status(500).json( { error: { code: "MISSING_TOKEN" } } );
             return;
@@ -35,6 +39,22 @@ module.exports = ( request, response, next ) => {
                         next();
                         return;
                     }
+                    if ( request.path === '/volunt' && request.body.id === decoded.id ) { 
+                        next();
+                        return;
+                    }
+                }
+                else if ( request.method === 'PUT' ) {
+                    if ( request.path === '/volunt' && request.body.identifier.id === decoded.id ) {
+                        next();
+                        return;
+                    }
+                }
+                else if ( request.method === 'DELETE' ) {
+                    if ( request.path === '/volunt' && request.body.identifier.id === decoded.id ) {
+                        next();
+                        return;
+                    }
                 }
                 else {
                     response.status(500).json( { error: { code: "AUTH_ERR", desc: "Method not supported" } } );
@@ -50,6 +70,7 @@ module.exports = ( request, response, next ) => {
                 response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 return;
             } )
+            response.status(500).json( { error: { code: "AUTH_ERR" } } );
         } )
         .catch( ( error ) => {
             console.log( error );

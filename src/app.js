@@ -6,7 +6,7 @@ const app               = express( );
 const bp                = require( 'body-parser' );
 const CORS              = require( 'cors' );
 const databaseFields    = require( './databaseFields.json' );
-const { LOGIN, GET, POST, PUT, DELETE, DELETEcont } = require( './routes' );
+const { LOGIN, GET, POST, PUT, DELETE, DELETEcont, POSTvolunteer } = require( './routes' );
 const { fetchQuery }                                = require( './database' );
 const authMid = require( './authenticationMiddleware' );
 
@@ -27,25 +27,29 @@ app.use( authMid );
         GET     msg         - returns messages                  DONE
         GET     cont        - returns contacts                  DONE
         GET     comp        - returns component                 DONE
+        GET     volunt      - returns volunteers                DONE
         
-        POST    login       - returns token after validation    TODO
+        POST    login       - returns token after validation    DONE
         POST    admin       - add new admin                     DONE
         POST    user        - add new user                      DONE
         POST    msg         - add new message                   DONE
         POST    cont        - add new contact                   DONE
         POST    comp        - add component                     DONE
         POST    comp/prov   - add provider to comp              DONE
+        POST    volunt      - add volunteer                     DONE
         
         PUT     user        - change info about user            DONE
         PUT     admin       - change info about admin           DONE
         PUT     comp        - change info about comp            DONE
         PUT     comp/prov   - change info about prov            DONE
+        PUT     volunt      - change info about volunteer       DONE
 
         DELETE  user        - delete user                       DONE
         DELETE  admin       - delete admin                      DONE
         DELETE  cont        - delete contact                    DONE
         DELETE  comp        - delete component                  DONE
         DELETE  comp/prov   - delete component prov             DONE
+        DELETE  volunt      - delete volunteer                  DONE
     */
 
     /* GET */
@@ -95,6 +99,12 @@ app.use( authMid );
             app.get( '/comp/prov', ( request, response ) => {
                 GET( 'provider', request, response );
             } )
+
+        /* Volunteer */
+
+        app.get( "/volunt", ( request, response ) => {
+            GET( 'volunteer', request, response );
+        } )
 
     /* POST */
 
@@ -157,6 +167,12 @@ app.use( authMid );
                 POST( 'provider', databaseFields.provider, request, response );
             } )
 
+        /* Volunteer */
+
+        app.post( "/volunt", ( request, response ) => {
+            POSTvolunteer( 'volunteer', databaseFields.volunteer, request, response );
+        } )
+
     /* PUT */
 
         /* User */
@@ -191,6 +207,12 @@ app.use( authMid );
                 PUT( 'provider', request, response );
             } )
 
+        /* Volunteer */
+
+        app.put( "/volunt", ( request, response ) => {
+            PUT( 'volunteer', request, response );
+        } )
+
     /* DELETE */
 
         /* User */
@@ -222,6 +244,12 @@ app.use( authMid );
             app.delete( '/comp/prov', ( request, response ) => {
                 DELETE( 'provider', request, response );
             } )
+
+        /* Volunteer */
+
+        app.delete( "/volunt", ( request, response ) => {
+            DELETE( 'volunteer', request, response );
+        } )
 
 /* ------------ */
 
