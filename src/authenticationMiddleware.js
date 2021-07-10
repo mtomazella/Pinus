@@ -70,7 +70,6 @@ module.exports = ( request, response, next ) => {
                 response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 return;
             } )
-            response.status(500).json( { error: { code: "AUTH_ERR" } } );
         } )
         .catch( ( error ) => {
             console.log( error );
