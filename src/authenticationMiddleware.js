@@ -11,7 +11,7 @@ module.exports = ( request, response, next ) => {
             next();
             return;
         }
-        if ( request.method === 'GET' && [ '/comp', 'comp/prov', '/volunt' ].includes(request.path) ) {
+        if ( request.method === 'GET' && [ '/comp', '/comp/prov', '/volunt' ].includes(request.path) ) {
             next();
             return;
         }
