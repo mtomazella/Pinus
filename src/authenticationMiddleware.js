@@ -1,18 +1,24 @@
 const { validateToken } = require( './authentication' );
 const { fetchQuery } = require( './database' );
 
+function pass ( request, next ) { 
+    delete request.query.token;
+    delete request.body.token;
+    next();
+}
+
 module.exports = ( request, response, next ) => {
     try {
         if ( request.path === '/login' || request.path === '/' || request.path === '/ping' ) {
-            next();
+            pass( request, next );
             return;
         }
         if ( request.method === 'POST' && request.path === '/user' ) { 
-            next();
+            pass( request, next );
             return;
         }
         if ( request.method === 'GET' && [ '/comp', '/comp/prov', '/volunt' ].includes(request.path) ) {
-            next();
+            pass( request, next );
             return;
         }
         if ( !request.body.token && !request.query.token ) {
