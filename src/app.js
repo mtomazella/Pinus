@@ -6,7 +6,7 @@ const app               = express( );
 const bp                = require( 'body-parser' );
 const CORS              = require( 'cors' );
 const databaseFields    = require( './databaseFields.json' );
-const { LOGIN, GET, POST, PUT, DELETE, DELETEcont, POSTvolunteer } = require( './routes' );
+const { LOGIN, GET, POST, PUT, DELETE, DELETEcont, POSTvolunteer, GETvolunteer } = require( './routes' );
 const { fetchQuery }                                = require( './database' );
 const authMid = require( './authenticationMiddleware' );
 
@@ -103,7 +103,7 @@ app.use( authMid );
         /* Volunteer */
 
         app.get( "/volunt", ( request, response ) => {
-            GET( 'volunteer', request, response );
+            GETvolunteer( request, response );
         } )
 
     /* POST */

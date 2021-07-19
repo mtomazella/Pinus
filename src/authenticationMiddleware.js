@@ -34,33 +34,33 @@ module.exports = ( request, response, next ) => {
                     if ( [ '/admin', '/comp', '/comp/prov' ].includes( request.path ) ) { 
                         next();
                         return;
-                    }
+                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                     if ( request.path === '/msg' && request.query.userId === decoded.id ) { 
                         next();
                         return;
-                    }
+                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 }
                 else if ( request.method === 'POST' ) { 
                     if ( request.path === '/msg' && request.body.userId === decoded.id ) { 
                         next();
                         return;
-                    }
+                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                     if ( request.path === '/volunt' && request.body.id === decoded.id ) { 
                         next();
                         return;
-                    }
+                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 }
                 else if ( request.method === 'PUT' ) {
                     if ( request.path === '/volunt' && request.body.identifier.id === decoded.id ) {
                         next();
                         return;
-                    }
+                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 }
                 else if ( request.method === 'DELETE' ) {
                     if ( request.path === '/volunt' && request.body.identifier.id === decoded.id ) {
                         next();
                         return;
-                    }
+                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 }
                 else {
                     response.status(500).json( { error: { code: "AUTH_ERR", desc: "Method not supported" } } );

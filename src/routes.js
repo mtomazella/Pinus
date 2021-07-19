@@ -1,5 +1,6 @@
-const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact, insertVolunteer } = require( './database' );
+const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact, insertVolunteer, fetchVolunteer } = require( './database' );
 const { encrypt, generateToken } = require( './authentication' );
+const databaseFields = require( './databaseFields.json' )
 
 module.exports = {  
     LOGIN: ( request, response ) => {
@@ -43,6 +44,28 @@ module.exports = {
         }
         if ( orderBy ) query += `ORDER BY ${orderBy};`;
         fetchQuery( query, false )
+        .then( ( users ) => {
+            response.status(200).json( users );
+        } )
+        .catch( ( error ) => {
+            response.status(500).json( { 'error': { errorCode: error.code, error: error.raw } } );
+        } )
+    },
+    GETvolunteer: ( request, response ) => {
+        let query = `SELECT v.id, v.isInstitution, v.nameVisibility, v.contactEmail, v.whatsapp, v.country, v.state, v.city, v.description, u.name FROM volunteer v INNER JOIN user u ON v.id = u.id `;
+        let orderBy;
+        if ( request.query && request.query.order ) { orderBy = request.query.order; delete request.query.order; };
+        if ( Object.keys( request.query )[0] ) {
+            if ( request.query.password ) request.query.password = encrypt( request.query.password );
+            const keys = Object.keys( request.query );
+            query += ( ` WHERE ${keys[0]=="name"?"u":"v"}.${keys[0]} = "${request.query[keys[0]]}"` );
+            keys.shift( );
+            keys.forEach( key => {
+                query += ` AND ${key} = "${request.query[key]}"`;
+            } )
+        }
+        if ( orderBy ) query += `ORDER BY ${orderBy};`;
+        fetchVolunteer( query )
         .then( ( users ) => {
             response.status(200).json( users );
         } )

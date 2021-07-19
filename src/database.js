@@ -72,6 +72,24 @@ function elementExists ( table, identifier ) {
 
 module.exports = {
     fetchQuery,
+    fetchVolunteer: ( query ) => {
+        return new Promise( ( resolve, reject ) => {
+            const connection = mysql.createConnection( sqlConfig );
+            connection.connect( ( error ) => {
+                if ( error ) reject( { code: 'CONNECTION_ERROR', raw: error } );
+                connection.query( query, ( error, Qres ) => {
+                    if ( error ) reject( { code: 'QUERY_ERROR', raw: error } );
+                    if ( Qres )
+                        Qres.forEach( volunteer => {
+                            if ( volunteer.nameVisibility == 0 ) 
+                                volunteer.name = undefined;
+                        });
+                    connection.end();
+                    resolve( Qres );
+                } );
+            } )
+        } );
+    },
     insertQuery: ( table, values, fields ) => {
         return new Promise( ( resolve, reject ) => {
             const connection = mysql.createConnection( sqlConfig );
