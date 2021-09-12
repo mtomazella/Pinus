@@ -5,5 +5,5 @@
     "contact": [ "id", "idAdmin", "idUser" ],
     "component": [ "id", "name", "descr" ],
     "provider": [ "id", "idComp", "name", "link", "cost" ],
-    "volunteer": [ "id", "nameVisibility", "isInstitution", "contactEmail", "whatsapp", "country", "state", "city", "description" ]
+    "volunteer": [ "id", "nameVisibility", "isInstitution", "contactEmail", "whatsapp", "country", "state", "city", "descr" ]
 }
