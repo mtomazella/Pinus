@@ -52,7 +52,7 @@ module.exports = {
         } )
     },
     GETvolunteer: ( request, response ) => {
-        let query = `SELECT v.id, v.isInstitution, v.nameVisibility, v.contactEmail, v.whatsapp, v.country, v.state, v.city, v.description, u.name FROM volunteer v INNER JOIN user u ON v.id = u.id `;
+        let query = `SELECT v.id, v.isInstitution, v.nameVisibility, v.contactEmail, v.whatsapp, v.country, v.state, v.city, v.descr, u.name FROM volunteer v INNER JOIN user u ON v.id = u.id `;
         let orderBy;
         if ( request.query && request.query.order ) { orderBy = request.query.order; delete request.query.order; };
         if ( Object.keys( request.query )[0] ) {
