@@ -1,6 +1,10 @@
+const mysql = require("mysql");
+
 const { fetchQuery, insertQuery, deleteQuery, updateQuery, deleteContact, insertVolunteer, fetchVolunteer } = require( './database' );
 const { encrypt, generateToken } = require( './authentication' );
-const databaseFields = require( './databaseFields.json' )
+const databaseFields = require( './databaseFields.json' );
+
+mysql.conn
 
 module.exports = {  
     LOGIN: ( request, response ) => {
@@ -30,20 +34,26 @@ module.exports = {
         } )
     },
     GET: ( table, request, response ) => {
-        let query = ` SELECT * FROM ${table} `;
+        let query = `SELECT * FROM ${table} `;
         let orderBy;
+        const values = [];
+        
+        // Get order, if existent, and delete to not interfeer
         if ( request.query && request.query.order ) { orderBy = request.query.order; delete request.query.order; };
-        if ( Object.keys( request.query )[0] ) {
+
+        const keys = Object.keys( request.query );
+        if ( keys[0] ) { 
             if ( request.query.password ) request.query.password = encrypt( request.query.password );
-            const keys = Object.keys( request.query );
-            query += ( ` WHERE ${keys[0]} = "${request.query[keys[0]]}"` );
-            keys.shift( );
+            const where = [];
             keys.forEach( key => {
-                query += ` AND ${key} = "${request.query[key]}"`;
-            } )
+                where.push( `${key} = ?` );
+                values.push( request.query[key] );
+            } );
+            query += 'WHERE ' + where.join(",");
         }
-        if ( orderBy ) query += `ORDER BY ${orderBy};`;
-        fetchQuery( query, false )
+        if ( orderBy ) query += 'ORDER BY ' + orderBy;
+
+        fetchQuery( mysql.format( query, values ), false )
         .then( ( users ) => {
             response.status(200).json( users );
         } )
@@ -54,18 +64,23 @@ module.exports = {
     GETvolunteer: ( request, response ) => {
         let query = `SELECT v.id, v.isInstitution, v.nameVisibility, v.contactEmail, v.whatsapp, v.country, v.state, v.city, v.descr, u.name FROM volunteer v INNER JOIN user u ON v.id = u.id `;
         let orderBy;
+        const values = [];
+
         if ( request.query && request.query.order ) { orderBy = request.query.order; delete request.query.order; };
-        if ( Object.keys( request.query )[0] ) {
+
+        const keys = Object.keys( request.query );
+        if ( keys[0] ) {
             if ( request.query.password ) request.query.password = encrypt( request.query.password );
-            const keys = Object.keys( request.query );
-            query += ( ` WHERE ${keys[0]=="name"?"u":"v"}.${keys[0]} = "${request.query[keys[0]]}"` );
-            keys.shift( );
+            const where = [];
             keys.forEach( key => {
-                query += ` AND ${key} = "${request.query[key]}"`;
-            } )
+                where.push( `${key} = ?` );
+                values.push( request.query[key] );
+            } );
+            query += 'WHERE ' + where.join(",");
         }
         if ( orderBy ) query += `ORDER BY ${orderBy};`;
-        fetchVolunteer( query )
+        
+        fetchVolunteer( mysql.format( query, values ) )
         .then( ( users ) => {
             response.status(200).json( users );
         } )
