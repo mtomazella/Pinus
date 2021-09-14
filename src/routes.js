@@ -49,7 +49,7 @@ module.exports = {
                 where.push( `${key} = ?` );
                 values.push( request.query[key] );
             } );
-            query += 'WHERE ' + where.join(",");
+            query += 'WHERE ' + where.join(" AND ");
         }
         if ( orderBy ) query += 'ORDER BY ' + orderBy;
 
@@ -76,7 +76,7 @@ module.exports = {
                 where.push( `${key} = ?` );
                 values.push( request.query[key] );
             } );
-            query += 'WHERE ' + where.join(",");
+            query += 'WHERE ' + where.join(" AND ");
         }
         if ( orderBy ) query += `ORDER BY ${orderBy};`;
         
