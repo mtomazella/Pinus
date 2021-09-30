@@ -34,8 +34,8 @@ module.exports = ( request, response, next ) => {
                     if ( [ '/admin', '/comp', '/comp/prov' ].includes( request.path ) ) { 
                         next();
                         return;
-                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
-                    if ( request.path === '/msg' && request.query.userId === decoded.id ) { 
+                    }
+                    else if ( request.path === '/msg' && request.query.userId === decoded.id ) { 
                         next();
                         return;
                     } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
@@ -44,14 +44,14 @@ module.exports = ( request, response, next ) => {
                     if ( request.path === '/msg' && request.body.userId === decoded.id ) { 
                         next();
                         return;
-                    } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
-                    if ( request.path === '/volunt' && request.body.id === decoded.id ) { 
+                    }
+                    else if ( request.path === '/volunt' && request.body.id === decoded.id ) { 
                         next();
                         return;
                     } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 }
                 else if ( request.method === 'PUT' ) {
-                    if ( request.path === '/volunt' && request.body.identifier.id === decoded.id ) {
+                    if ( ['/volunt', '/user'].includes(request.path) && request.body.identifier.id == decoded.id ) {
                         next();
                         return;
                     } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
