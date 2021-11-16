@@ -45,7 +45,7 @@ module.exports = ( request, response, next ) => {
                         next();
                         return;
                     }
-                    else if ( request.path === '/volunt' && request.body.id === decoded.id ) { 
+                    else if ( request.path === '/volunt' && request.body.id == decoded.id ) { 
                         next();
                         return;
                     } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
@@ -57,7 +57,7 @@ module.exports = ( request, response, next ) => {
                     } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
                 }
                 else if ( request.method === 'DELETE' ) {
-                    if ( request.path === '/volunt' && request.body.identifier.id === decoded.id ) {
+                    if ( request.path === '/volunt' && request.body.identifier.id == decoded.id ) {
                         next();
                         return;
                     } else response.status(500).json( { error: { code: "AUTH_ERR" } } );
